@@ -1,0 +1,7 @@
+@import "../vendor/fonts/fonts.css";
+@import "../vendor/variables.css";
+@import "../blocks/page/page.css";
+@import "../blocks/page/__content/page__content.css";
+@import "../blocks/page/__title/page__title.css";
+@import "../blocks/header/header.css";
+@import "../blocks/footer/footer.css";

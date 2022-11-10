@@ -1,0 +1,8 @@
+.page__content {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  row-gap: 36px;
+  flex-grow: 1;
+}
