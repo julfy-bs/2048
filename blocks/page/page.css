@@ -1,0 +1,19 @@
+.page {
+  align-items: center;
+  background-color: var(--color-main-bg);
+  box-sizing: border-box;
+  color: var(--color-main-text);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-family-base);
+  font-size: 14px;
+  font-weight: 400;
+  height: 100vh;
+  justify-content: center;
+  line-height: 1.21;
+  margin: 0 auto;
+  max-width: var(--page-max-width);
+  min-width: var(--page-min-width);
+  padding-top: 28px;
+  width: 100%;
+}

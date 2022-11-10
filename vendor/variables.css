@@ -1,0 +1,29 @@
+:root {
+  /* Page */
+  /*/ Font /*/
+  --font-family-base: 'Clear Sans', 'Helvetica Neue', 'Arial', sans-serif;
+  /*/ Width/*/
+  --page-min-width: 320px;
+  --page-max-width: 500px;
+
+  /* Color */
+  /*/ Main /*/
+  --color-main-text: #776e65;
+  --color-main-bg: #faf8ef;
+  /*/ Tile /*/
+  --color-tile-2: #eee4da;
+  --color-tile-4: #ece0c7;
+  --color-tile-8: #f2b176;
+  --color-tile-16: #f59564;
+  --color-tile-32: #f67b5e;
+  --color-tile-64: #f55a37;
+  --color-tile-128: #edd072;
+  --color-tile-256: #edcc62;
+  --color-tile-512: #efc752;
+  --color-tile-1024: #ecc43e;
+  --color-tile-2048: #e9bf2c;
+  --color-tile-4096: #ff3d40;
+  --color-tile-8192: #ff1e20;
+  --color-tile-16384: #ff1e1d;
+  --color-tile-32768: #ff1e20;
+}
