@@ -3,5 +3,14 @@
 @import "../blocks/page/page.css";
 @import "../blocks/page/__content/page__content.css";
 @import "../blocks/page/__title/page__title.css";
+@import "../blocks/page/__button/page__button.css";
+
 @import "../blocks/header/header.css";
+@import "../blocks/header/__wrapper/header__wrapper.css";
+@import "../blocks/restart/restart.css";
+
+@import "../blocks/score/score.css";
+@import "../blocks/score/__title/score__title.css";
+@import "../blocks/score/__content/score__content.css";
+
 @import "../blocks/footer/footer.css";

@@ -2,14 +2,26 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+        name="viewport">
+  <meta content="ie=edge" http-equiv="X-UA-Compatible">
   <title>2048</title>
-  <link rel="stylesheet" href="./pages/index.css">
+  <link href="./pages/index.css" rel="stylesheet">
+  <link href="./images/logo.svg" rel="shortcut icon" type="image/x-icon">
 </head>
 <body class="page">
 <header class="header">
+  <div class="header__wrapper">
+    <div class="score score_value_current">
+      <h2 class="score__title">Текущий</h2>
+      <span class="score__content">2000</span>
+    </div>
+    <div class="score score_value_best">
+      <h2 class="score__title">Лучший</h2>
+      <span class="score__content">2000</span>
+    </div>
+  </div>
+  <button aria-label="Начать новую игру" class="page__button restart" type="button">Новая игра</button>
 </header>
 <main class="page__content">
 </main>
