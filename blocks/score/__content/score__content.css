@@ -1,0 +1,6 @@
+.score__content {
+  font-size: 1.8rem;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--color-white);
+}

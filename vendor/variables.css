@@ -5,11 +5,18 @@
   /*/ Width/*/
   --page-min-width: 320px;
   --page-max-width: 500px;
+  --page-padding: 1rem;
 
   /* Color */
   /*/ Main /*/
   --color-main-text: #776e65;
   --color-main-bg: #faf8ef;
+  /*/ primary /*/
+  --color-text-score: #eee4da;
+  --color-white: #fff;
+  --color-brown: #8f7a66;
+  /*/ Background /*/
+  --color-background: #bbada0;
   /*/ Tile /*/
   --color-tile-2: #eee4da;
   --color-tile-4: #ece0c7;
@@ -26,4 +33,6 @@
   --color-tile-8192: #ff1e20;
   --color-tile-16384: #ff1e1d;
   --color-tile-32768: #ff1e20;
+  /* Score */
+  --score-max-width: 250px;
 }
