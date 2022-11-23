@@ -1,0 +1,6 @@
+.tile_value_128 {
+  color: var(--color-text-light);
+  background: var(--color-tile-128);
+  box-shadow: var(--shadow-tile-128);
+  font-size: 3rem;
+}

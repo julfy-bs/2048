@@ -1,0 +1,12 @@
+.board__cells {
+  min-width: var(--board-min-width);
+  background: var(--color-background);
+  border-radius: 6px;
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--board-gap);
+  grid-template-columns: repeat(4, minmax(var(--tile-size), 1fr));
+  margin: 0;
+  padding: var(--board-padding);
+  width: 100%;
+}

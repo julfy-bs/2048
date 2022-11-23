@@ -1,0 +1,9 @@
+.cell {
+  list-style: none;
+  width: var(--tile-size);
+  min-width: var(--tile-min-size);
+  min-height: var(--tile-min-size);
+  height: var(--tile-size);
+  border-radius: 3px;
+  background: rgba(238, 228, 218, 0.35);
+}

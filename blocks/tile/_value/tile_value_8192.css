@@ -1,0 +1,5 @@
+.tile_value_8192 {
+  color: var(--color-text-light);
+  background: var(--color-tile-8192);
+  font-size: 2rem;
+}

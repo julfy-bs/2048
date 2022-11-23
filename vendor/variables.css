@@ -8,12 +8,13 @@
   --page-padding: 1rem;
 
   /* Color */
+  /*/ Text /*/
+  --color-text-light: #f9f6f2;
+  --color-text-dark: #776e65;
   /*/ Main /*/
-  --color-main-text: #776e65;
   --color-main-bg: #faf8ef;
   /*/ primary /*/
   --color-text-score: #eee4da;
-  --color-white: #fff;
   --color-brown: #8f7a66;
   /*/ Background /*/
   --color-background: #bbada0;
@@ -33,6 +34,39 @@
   --color-tile-8192: #ff1e20;
   --color-tile-16384: #ff1e1d;
   --color-tile-32768: #ff1e20;
+  /* Box-shadow */
+  /*/ Tile /*/
+  --shadow-tile-2: 0 0 30px 10px rgb(243 215 116 / 0%), inset 0 0 0 1px rgb(255 255 255 / 0%);
+  --shadow-tile-4: 0 0 30px 10px rgb(243 215 116 / 0%), inset 0 0 0 1px rgb(255 255 255 / 0%);
+  --shadow-tile-128: 0 0 30px 10px rgb(243 215 116 / 24%), inset 0 0 0 1px rgb(255 255 255 / 14%);
+  --shadow-tile-256: 0 0 30px 10px rgb(243 215 116 / 32%), inset 0 0 0 1px rgb(255 255 255 / 19%);
+  --shadow-tile-512: 0 0 30px 10px rgb(243 215 116 / 40%), inset 0 0 0 1px rgb(255 255 255 / 24%);
+  --shadow-tile-1024: 0 0 30px 10px rgb(243 215 116 / 48%), inset 0 0 0 1px rgb(255 255 255 / 29%);
+  --shadow-tile-2048: 0 0 30px 10px rgb(243 215 116 / 56%), inset 0 0 0 1px rgb(255 255 255 / 33%);
   /* Score */
-  --score-max-width: 250px;
+  --score-max-size: 250px;
+  /* Board */
+  --board-min-width: var(--page-min-width);
+  --board-padding: .7rem;
+  --board-gap: .5rem;
+  --board-transform-step: calc(var(--tile-size) + var(--board-gap)) ;
+  /* Tile */
+  --tile-min-size: 68px;
+  --tile-size: calc((100vw - var(--board-padding) * 2 - var(--board-gap) * 3) / 4);
 }
+
+@media (min-width: 500px) {
+  :root {
+    /* Tile */
+    --tile-size: calc((var(--page-max-width) - var(--page-padding) * 2 - var(--board-padding) * 2 - var(--board-gap) * 3) / 4);
+  }
+}
+
+/*   position: absolute;
+  top: calc(var(--board-transform-step) * 2);
+  left: calc(var(--board-transform-step) * 3); */
+
+/* .tile_position_2_1 {
+  top: var(--board-padding);
+  left: calc(var(--board-padding) + var(--board-transform-step));
+} */

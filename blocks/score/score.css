@@ -10,5 +10,5 @@
   padding: 0 1.6rem;
   row-gap: .1rem;
   width: 100%;
-  max-width: var(--score-max-width);
+  max-width: var(--score-max-size);
 }

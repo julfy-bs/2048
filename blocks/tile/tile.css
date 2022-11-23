@@ -1,0 +1,17 @@
+.tile {
+  position: absolute;
+  top: var(--board-padding);
+  left: var(--board-padding);
+  width: var(--tile-size);
+  min-width: var(--tile-min-size);
+  min-height: var(--tile-min-size);
+  height: var(--tile-size);
+  border-radius: 3px;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  font-size: 3.5rem;
+  /* transition: transform .5s ease; */
+}

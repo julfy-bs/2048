@@ -1,0 +1,5 @@
+.tile_value_4096 {
+  color: var(--color-text-light);
+  background: var(--color-tile-4096);
+  font-size: 2rem;
+}
