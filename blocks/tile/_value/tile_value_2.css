@@ -1,5 +1,4 @@
 .tile_value_2 {
   background-color: var(--color-tile-2);
   box-shadow: var(--shadow-tile-2);
-  transition: grid-area .5s ease;
 }

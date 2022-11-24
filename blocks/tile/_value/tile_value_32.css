@@ -1,4 +1,4 @@
 .tile_value_32 {
-  color: var(--color-text-light);
   background-color: var(--color-tile-32);
+  color: var(--color-text-light);
 }

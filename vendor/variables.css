@@ -5,7 +5,9 @@
   /*/ Width/*/
   --page-min-width: 320px;
   --page-max-width: 500px;
-  --page-padding: 1rem;
+  --page-padding-top: 1.8rem;
+  --page-padding-side: 1rem;
+  --page-section-gap: 2rem;
 
   /* Color */
   /*/ Text /*/
@@ -49,16 +51,28 @@
   --board-min-width: var(--page-min-width);
   --board-padding: .7rem;
   --board-gap: .5rem;
-  --board-transform-step: calc(var(--tile-size) + var(--board-gap)) ;
+  --board-transform-step: calc(var(--tile-size) + var(--board-gap));
   /* Tile */
   --tile-min-size: 68px;
-  --tile-size: calc((100vw - var(--board-padding) * 2 - var(--board-gap) * 3) / 4);
+  --tile-size: calc((320px - var(--board-padding) * 2 - var(--board-gap) * 3) / 4);
+}
+
+@media (min-width: 320px) {
+  :root {
+    /* Tile */
+    --tile-min-size: 68px;
+    --tile-size: calc((100vw - var(--board-padding) * 2 - var(--board-gap) * 3) / 4);
+  }
 }
 
 @media (min-width: 500px) {
   :root {
+    /* Page */
+    --page-padding-top: 4rem;
+    --page-padding-side: 1rem;
+    --page-section-gap: 4rem;
     /* Tile */
-    --tile-size: calc((var(--page-max-width) - var(--page-padding) * 2 - var(--board-padding) * 2 - var(--board-gap) * 3) / 4);
+    --tile-size: calc((var(--page-max-width) - var(--page-padding-side) * 2 - var(--board-padding) * 2 - var(--board-gap) * 3) / 4);
   }
 }
 

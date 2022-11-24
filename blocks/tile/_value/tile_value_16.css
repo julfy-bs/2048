@@ -1,4 +1,4 @@
 .tile_value_16 {
-  color: var(--color-text-light);
   background-color: var(--color-tile-16);
+  color: var(--color-text-light);
 }

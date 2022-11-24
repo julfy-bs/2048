@@ -14,7 +14,9 @@
 @import "../blocks/board/board.css";
 @import "../blocks/board/__cells/board__cells.css";
 @import "../blocks/cell/cell.css";
+@import "../blocks/board/__tiles/board__tiles.css";
 @import "../blocks/tile/tile.css";
+@import "../blocks/tile/__content/tile__content.css";
 @import "../blocks/tile/_value/tile_value_2.css";
 @import "../blocks/tile/_value/tile_value_4.css";
 @import "../blocks/tile/_value/tile_value_8.css";
@@ -46,7 +48,7 @@
 @import "../blocks/tile/_position/tile_position_2_4.css";
 @import "../blocks/tile/_position/tile_position_3_4.css";
 @import "../blocks/tile/_position/tile_position_4_4.css";
-@import "../blocks/tile/_new/tile_new.css";
+@import "../blocks/tile/__appear/tile__appear.css";
 
 
 @import "../blocks/footer/footer.css";
