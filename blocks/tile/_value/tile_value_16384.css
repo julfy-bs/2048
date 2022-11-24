@@ -1,0 +1,11 @@
+.tile_value_16384 {
+  background: var(--color-tile-16384);
+  color: var(--color-text-light);
+  font-size: 1.4rem;
+}
+
+@media (min-width: 500px) {
+  .tile_value_16384 {
+    font-size: 2rem;
+  }
+}

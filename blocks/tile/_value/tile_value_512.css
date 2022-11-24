@@ -1,0 +1,12 @@
+.tile_value_512 {
+  background: var(--color-tile-512);
+  box-shadow: var(--shadow-tile-512);
+  color: var(--color-text-light);
+  font-size: 2rem;
+}
+
+@media (min-width: 500px) {
+  .tile_value_512 {
+    font-size: 3rem;
+  }
+}

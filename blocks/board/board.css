@@ -1,0 +1,5 @@
+.board {
+  position: relative;
+  min-width: var(--board-min-width);
+  width: 100%;
+}
