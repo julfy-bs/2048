@@ -7,9 +7,12 @@ const board = document.querySelector('.board');
 const tilesWrapper = board.querySelector('.board__tiles');
 const tileTemplate = document.querySelector('#tile').content.querySelector('.tile');
 
+// helper
 const getRandomNumber = (max, min) => {
   return Math.floor(Math.random() * (max + 1 - min)) + min;
 };
+
+// tile value rule
 const setDefaultValueRules = () => {
   const chance = getRandomNumber(9, 1);
   if (chance < 9) {
@@ -19,36 +22,37 @@ const setDefaultValueRules = () => {
   }
 };
 
-const setRandomPosition = () => {
-  const tiles = board.querySelectorAll('li.tile');
-  let x;
-  let y;
-  let isEmpty = false;
-
-  do {
-    x = getRandomNumber(4, 1);
-    y = getRandomNumber(4, 1);
-    // console.log([...tiles].map(item=> {
-    //   // console.log(!item.classList.contains(`tile_position_${x}_${y}`));
-    //   return [...item.classList].includes(`tile_position_${x}_${y}`)
-    // }));
-    // console.log([...tiles].includes(item=> {
-    //   // console.log(!item.classList.contains(`tile_position_${x}_${y}`));
-    //   return item.classList.contains(`tile_position_${x}_${y}`)
-    // }));
-    //  x, y, [...tiles],
-    //  должен вернуть фолз чтобы значение было уникальным
-
-    [...tiles].forEach(item => {
-      // console.log(item, x, y, [...item.classList].includes(`tile_position_${x}_${y}`));
-      if ([...item.classList].includes(`tile_position_${x}_${y}`)) {
-        isEmpty = true;
-      }
-    });
-  } while (isEmpty);
-
-  return { x, y };
-};
+// tile position
+// const setRandomPosition = () => {
+//   // const tiles = board.querySelectorAll('li.tile');
+//   // let x;
+//   // let y;
+//   // let isEmpty = false;
+//
+//   // do {
+//   //   x = getRandomNumber(4, 1);
+//   //   y = getRandomNumber(4, 1);
+//   //   // console.log([...tiles].map(item=> {
+//   //   //   // console.log(!item.classList.contains(`tile_position_${x}_${y}`));
+//   //   //   return [...item.classList].includes(`tile_position_${x}_${y}`)
+//   //   // }));
+//   //   // console.log([...tiles].includes(item=> {
+//   //   //   // console.log(!item.classList.contains(`tile_position_${x}_${y}`));
+//   //   //   return item.classList.contains(`tile_position_${x}_${y}`)
+//   //   // }));
+//   //   //  x, y, [...tiles],
+//   //   //  должен вернуть фолз чтобы значение было уникальным
+//   //
+//   //   [...tiles].forEach(item => {
+//   //     // console.log(item, x, y, [...item.classList].includes(`tile_position_${x}_${y}`));
+//   //     if ([...item.classList].includes(`tile_position_${x}_${y}`)) {
+//   //       isEmpty = true;
+//   //     }
+//   //   });
+//   // } while (isEmpty);
+//
+//   return 'coords';
+// };
 
 
 const setTilePosition = (tile) => {
