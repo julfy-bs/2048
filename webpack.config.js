@@ -28,7 +28,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       title: 'our project',
-      template: 'src/pages/index.html',
+      template: 'index.html',
     }),
     new MiniCssExtractPlugin({
       filename:"bundle.css"})
