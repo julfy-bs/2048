@@ -6,55 +6,10 @@
         name="viewport">
   <meta content="ie=edge" http-equiv="X-UA-Compatible">
   <title>2048</title>
-  <link href="index.css" rel="stylesheet">
+  <link href="index.css" rel="stylesheet" type="text/html">
   <link href="src/shared/images/logo.svg" rel="shortcut icon" type="image/x-icon">
 </head>
 <body class="page">
-<header class="header">
-  <div class="header__wrapper">
-    <div class="score score_value_current">
-      <h2 class="score__title">Текущий</h2>
-      <span class="score__content">0</span>
-    </div>
-    <div class="score score_value_best">
-      <h2 class="score__title">Лучший</h2>
-      <span class="score__content">0</span>
-    </div>
-  </div>
-  <button aria-label="Начать новую игру" class="page__button restart" type="button">Новая игра</button>
-</header>
-<main class="page__content">
-  <div class="board">
-    <ul class="board__cells">
-      <li class="cell"></li>
-      <li class="cell"></li>
-      <li class="cell"></li>
-      <li class="cell"></li>
-      <li class="cell"></li>
-      <li class="cell"></li>
-      <li class="cell"></li>
-      <li class="cell"></li>
-      <li class="cell"></li>
-      <li class="cell"></li>
-      <li class="cell"></li>
-      <li class="cell"></li>
-      <li class="cell"></li>
-      <li class="cell"></li>
-      <li class="cell"></li>
-      <li class="cell"></li>
-    </ul>
-    <ul class="board__tiles">
-
-    </ul>
-  </div>
-</main>
-<footer class="footer">
-</footer>
-<template id="tile">
-  <li class="tile">
-    <span class="tile__content"></span>
-  </li>
-</template>
-<script src="src/features/index.js"></script>
+<canvas id="canvas">Если Вы видите это сообщение, то обновите, пожалуйста, браузер!</canvas>
 </body>
 </html>

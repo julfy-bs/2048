@@ -82,7 +82,7 @@ const createTile = (template, value = 'default') => {
   } else {
     setTileValue(tileClone, tileCloneContent, value);
   }
-  console.log(tileClone);
+  // console.log(tileClone);
 
   return tileClone;
 };
@@ -99,7 +99,7 @@ const mergeTiles = () => {
 arrowsArray.forEach(item => {
   document.addEventListener('keydown', (e) => {
     if (e.key === item) {
-      console.log(item);
+      // console.log(item);
       const tile = createTile(tileTemplate);
       addTile(tile);
     }
