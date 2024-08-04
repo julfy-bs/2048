@@ -1,5 +1,12 @@
 import { Config } from '../../../../app';
 
+export type CellConstructor = {
+  ctx: CanvasRenderingContext2D;
+  config: Config;
+  size: number;
+  coordinates: number[];
+}
+
 export class Cell {
   readonly ctx: CanvasRenderingContext2D;
   x: number;
@@ -14,25 +21,20 @@ export class Cell {
     size,
     coordinates,
     config
-  }: any) {
+  }: CellConstructor) {
     this.ctx = ctx;
     this.size = size;
     this.config = config;
     this.color = 'rgba(238, 228, 218, 0.35)';
     this.coordinates = coordinates;
-    this.x = this.config.board?.map?.get(coordinates)?.x;
-    this.y = this.config.board?.map?.get(coordinates)?.y;
+    this.x = this.config.board.map[this.coordinates[0]][this.coordinates[1]].x!;
+    this.y = this.config.board.map[this.coordinates[0]][this.coordinates[1]].y!;
   }
 
-  addCell() {
+  draw() {
     this.ctx.fillStyle = this.color;
     this.ctx.beginPath();
     this.ctx.roundRect(this.x, this.y, this.size, this.size, [2]);
     this.ctx.fill();
-    this.insertTile();
-  }
-
-  insertTile() {
-    // console.log(this.coordinates, this.x, this.y);
   }
 }
