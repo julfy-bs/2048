@@ -26,6 +26,7 @@ export type TileConstructor = {
 }
 
 export class Tile extends Cell implements ITile {
+  id: string;
   x: number;
   y: number;
   readonly ctx: CanvasRenderingContext2D;
@@ -106,5 +107,13 @@ export class Tile extends Cell implements ITile {
     this.x = this.config.board.map[XCoordinate][YCoordinate].x;
     this.y = this.config.board.map[XCoordinate][YCoordinate].y;
     this.coordinates = coordinates;
+  }
+
+  public changeId(id: string) {
+    this.id = id;
+  }
+
+  public changeValue() {
+    this.value = this.value * 2;
   }
 }
