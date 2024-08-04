@@ -25,9 +25,11 @@
   },
   "homepage": "https://github.com/julfy-bs/2048#readme",
   "devDependencies": {
+    "@types/uuid": "^10.0.0",
     "css-loader": "^7.1.2",
     "html-webpack-plugin": "^5.6.0",
     "mini-css-extract-plugin": "^2.9.0",
+    "nanoid": "^5.0.7",
     "ts-loader": "^9.5.1",
     "typescript": "^5.5.4",
     "webpack": "^5.93.0",

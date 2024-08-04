@@ -61,11 +61,11 @@ export class Tile extends Cell implements ITile {
     this.fontSize = config.board.fontSize;
     this.fontColor = config.board.fontColor;
     this.coordinates = coordinates;
-    this.x = config.board?.map?.get(coordinates)?.x;
-    this.y = config.board?.map?.get(coordinates)?.y;
+    this.x = this.config.board.map[this.coordinates[0]][this.coordinates[1]].x;
+    this.y = this.config.board.map[this.coordinates[0]][this.coordinates[1]].y;
   }
 
-  _assignColor() {
+  protected _assignColor(): void {
     const colors = Object.entries(colorsMap);
     let i = 0;
     while (i < colors.length) {
@@ -81,11 +81,10 @@ export class Tile extends Cell implements ITile {
     }
   }
 
-  assignValue = () => {
+  protected _assignValue(): void {
     this.ctx.font = `bold ${ this.fontSize }px ${ this.font }`;
     this.ctx.textAlign = 'center';
     this.ctx.fillStyle = this.fontColor;
-    // console.log(this.x, this.y);
     this.ctx.fillText(
       this.value.toString(),
       this.x + this.size / 2,
@@ -93,11 +92,19 @@ export class Tile extends Cell implements ITile {
     );
   };
 
-  addTile = (): void => {
+  public draw(): void {
     this._assignColor();
     this.ctx.fillStyle = this.color;
     this.ctx.beginPath();
     this.ctx.roundRect(this.x, this.y, this.size, this.size, [2]);
     this.ctx.fill();
+    this._assignValue();
   };
+
+  public changePosition(coordinates: Coordinates): void {
+    const [XCoordinate, YCoordinate] = coordinates;
+    this.x = this.config.board.map[XCoordinate][YCoordinate].x;
+    this.y = this.config.board.map[XCoordinate][YCoordinate].y;
+    this.coordinates = coordinates;
+  }
 }
