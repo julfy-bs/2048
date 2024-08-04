@@ -25,6 +25,8 @@ export type Coordinates = [XCoordinate, YCoordinate]
 
 const cellSize = 128;
 const boardSize = 572;
+// const boardSize = window.innerWidth - 20 ?? 572;
+// const boardHeight = (window.innerWidth - 20 + (window.innerWidth - 20) / 100 * 33) ?? 572;
 const fontSize = 40;
 const fontColor = '#776e65';
 const padding = 12;
