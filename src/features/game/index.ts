@@ -1,4 +1,4 @@
-import { Config, Coordinates, GameConstruct, getRandomCoords, TMap } from '../../app';
+import { Config, GameConstruct, getRandomCoords, TMap } from '../../app';
 import { Board } from '../../shared/ui/components/board';
 import { Cell } from '../../shared/ui/components/cell';
 import { Tile } from '../../shared/ui/components/tile';
@@ -9,25 +9,29 @@ export type GameConstructor = {
   engine: GameConstruct;
 }
 
+enum GameStatus {
+  OVER = 'over',
+  CONTINUES = 'continues',
+  NEW = 'new'
+}
+
 /**
  * @class Game
  * @description Создает объект игры.
  */
 export class Game {
-  gameStatus: 'over' | 'continues';
+  gameStatus: GameStatus.OVER | GameStatus.CONTINUES | GameStatus.NEW;
   isCreatingTilesAvailable: boolean;
   score: number;
   _engine: GameConstruct;
-  _cache: TMap[][] | null;
   readonly _ctx: CanvasRenderingContext2D;
   readonly _config: Config;
-  private freeCells: Coordinates[];
   private moveCounter: number;
   private _nativeStopper: boolean;
   private _oldX: number;
   private _oldY: number;
-  private _tiles: Tile[];
   private _gameCached: boolean;
+  private readonly _cache: TMap[][] | null;
 
   constructor({
     ctx,
@@ -36,18 +40,13 @@ export class Game {
   }: GameConstructor) {
     this._ctx = ctx;
     this._config = config;
-    this.freeCells = [];
-    this.isCreatingTilesAvailable = this.freeCells.length > 0;
     this.score = 0;
     this.moveCounter = 0;
     this._nativeStopper = false;
     this._engine = engine;
     this._oldX = 0;
     this._oldY = 0;
-    this._cache = null;
-    // JSON.parse(localStorage.getItem('cache')) ??
-    this._tiles = [];
-    console.log(JSON.stringify(this._cache), JSON.parse(localStorage.getItem('cache')));
+    this._cache = JSON.parse(localStorage.getItem('cache')) ?? null;
   }
 
   public start() {
@@ -55,12 +54,11 @@ export class Game {
       this._gameCached = true;
     }
     this._startFirstRound();
-    this.gameStatus = 'continues';
+    this.gameStatus = GameStatus.CONTINUES;
     this._addEventListeners();
-    console.log(this._tiles);
   }
 
-  protected create() {
+  private create() {
     const {
       cell: createCell,
       tile: createTile,
@@ -91,33 +89,28 @@ export class Game {
         return cells;
       },
       // TODO: Тип
-      tile: ({ coordinates, value }: { coordinates?: number[], value?: number } = {
-        coordinates: null,
-        value: null,
-      }): Tile => {
+      tile: (): Tile => {
         let newTile: Tile;
         let isTileCreated = false;
 
         while (!isTileCreated && this.isCreatingTilesAvailable) {
           newTile = createTile({
             ctx: this._ctx,
-            coordinates: coordinates || [
+            coordinates: [
               getRandomCoords(0, this._config.game.size),
               getRandomCoords(0, this._config.game.size),
             ],
-            value: value || getRandomCoords(0, 100) > 90 ? 4 : 2,
+            value: getRandomCoords(0, 100) > 90 ? 4 : 2,
             config: this._config,
           });
-          const isCellAvailable: boolean = this.freeCells.some((coordinates: Coordinates) => coordinates.toString() === newTile.coordinates.toString());
+          const isCellAvailable: boolean = this._config.board.map[newTile.coordinates[0]][newTile.coordinates[1]].value === null;
           if (isCellAvailable
             && !this._config.board.map[newTile.coordinates[0]][newTile.coordinates[1]]?.value
           ) {
             this._config.board.map[newTile.coordinates[0]][newTile.coordinates[1]].value = newTile.value;
-            newTile.changeId(this._config.board.map[newTile.coordinates[0]][newTile.coordinates[1]].id);
             isTileCreated = true;
-            this._tiles.push(newTile);
           } else if (!isCellAvailable && !this.isCreatingTilesAvailable) {
-            this.gameStatus = 'over';
+            this.gameStatus = GameStatus.OVER;
             console.log(this.gameStatus);
           }
         }
@@ -125,39 +118,25 @@ export class Game {
         this._findFreeCells();
         return newTile;
       },
-      // TODO: баг с координатами
-      tiles: (tiles: TMap[][]) => {
-        for (let x = 0; x < tiles.length; x++) {
-          for (let y = 0; y < tiles.length; y++) {
-            if (tiles[x][y].value !== null) {
-              const newTile = createTile({
-                ctx: this._ctx,
-                config: this._config,
-                coordinates: tiles[x][y].coordinates,
-                value: tiles[x][y].value,
-              });
-              this._tiles.push(newTile);
-            }
-          }
-        }
-      },
     };
   }
 
-  protected _findFreeCells(): void {
-    this.freeCells = [];
+  private _findFreeCells(): void {
+    const freeCells = [];
+
     for (let x = 0; x < this._config.board.map.length; x++) {
       for (let y = 0; y < this._config.board.map.length; y++) {
         if (this._config.board.map[x][y].value === null) {
-          this.freeCells.push([x, y]);
+          freeCells.push([x, y]);
         }
       }
     }
-    this.isCreatingTilesAvailable = this.freeCells.length > 0;
+    this.isCreatingTilesAvailable = freeCells.length > 0;
   }
 
-  protected _draw() {
+  private _draw() {
     const { board: createBoard, cell: createCell } = this.create();
+    const { tile: createTile } = this._engine;
     return {
       board: (): void => {
         createBoard()
@@ -167,16 +146,25 @@ export class Game {
         const cells = createCell();
         cells.forEach((cell: Cell) => cell.draw());
       },
-      tile: (): void => {
-        this._tiles.forEach(tile => {
-          tile.changeId(this._config.board.map[tile.coordinates[0]][tile.coordinates[1]].id);
-          tile.draw();
-        });
+      tiles: () => {
+        for (let y = 0; y < this._config.board.map.length; y++) {
+          for (let x = 0; x < this._config.board.map.length; x++) {
+            if (this._config.board.map[y][x].value !== null) {
+              const newTile = createTile({
+                ctx: this._ctx,
+                config: this._config,
+                coordinates: this._config.board.map[y][x].coordinates,
+                value: this._config.board.map[y][x].value,
+              });
+              newTile.draw();
+            }
+          }
+        }
       },
     };
   }
 
-  protected _controller() {
+  private _controller() {
     let isPositionChanged = false;
     return {
       up: () => {
@@ -186,28 +174,15 @@ export class Game {
               let row = x;
               while (row > 0) {
                 if (!this._config.board.map[row - 1][y].value) {
-                  let currentTile: Tile = this._tiles.find((item: Tile) => {
-                    return item.id === this._config.board.map[row][y].id;
-                  });
+
                   this._config.board.map[row - 1][y].value = this._config.board.map[row][y].value;
-                  currentTile.changePosition([row - 1, y]);
-                  currentTile.changeId(this._config.board.map[row - 1][y].id);
                   this._config.board.map[row][y].value = null;
                   isPositionChanged = true;
                   row--;
                 } else if (this._config.board.map[row - 1][y].value === this._config.board.map[row][y].value) {
-                  let prevTile: Tile = this._tiles.find((item: Tile) => {
-                    return item.id === this._config.board.map[row - 1][y].id;
-                  });
-                  let currentTile: Tile = this._tiles.find((item: Tile) => {
-                    return item.id === this._config.board.map[row][y].id;
-                  });
-                  prevTile.changeValue();
                   this._config.board.map[row - 1][y].value *= 2;
-                  prevTile.changeId(this._config.board.map[row - 1][y].id);
                   this.score += this._config.board.map[row - 1][y].value;
                   this._config.board.map[row][y].value = null;
-                  this._tiles = this._tiles.filter(item => item.id !== currentTile.id);
                   isPositionChanged = true;
                   break;
                 } else {
@@ -232,27 +207,13 @@ export class Game {
             if (this._config.board.map[x][y]?.value) {
               while (column + 1 < this._config.game.size) {
                 if (!this._config.board.map[x][column + 1]?.value) {
-                  let currentTile: Tile = this._tiles.find((item: Tile) => {
-                    return item.id === this._config.board.map[x][column].id;
-                  });
                   this._config.board.map[x][column + 1].value = this._config.board.map[x][column].value;
-                  currentTile.changePosition([x, column + 1]);
-                  currentTile.changeId(this._config.board.map[x][column + 1].id);
                   this._config.board.map[x][column].value = null;
                   isPositionChanged = true;
                   column++;
                 } else if (this._config.board.map[x][column + 1].value === this._config.board.map[x][column].value) {
-                  let currentTile: Tile = this._tiles.find((item: Tile) => {
-                    return item.id === this._config.board.map[x][column].id;
-                  });
-                  let nextTile: Tile = this._tiles.find((item: Tile) => {
-                    return item.id === this._config.board.map[x][column + 1].id;
-                  });
-                  nextTile.changeValue();
                   this._config.board.map[x][column + 1].value *= 2;
-                  nextTile.changeId(this._config.board.map[x][column + 1].id);
                   this.score += this._config.board.map[x][column + 1].value;
-                  this._tiles = this._tiles.filter(item => item.id !== currentTile.id);
                   this._config.board.map[x][column].value = null;
                   isPositionChanged = true;
                   break;
@@ -278,28 +239,14 @@ export class Game {
             if (this._config.board.map[x][y].value) {
               while (row + 1 < this._config.game.size) {
                 if (!this._config.board.map[row + 1][y].value) {
-                  let currentTile: Tile = this._tiles.find((item: Tile) => {
-                    return item.id === this._config.board.map[row][y].id;
-                  });
                   this._config.board.map[row + 1][y].value = this._config.board.map[row][y].value;
-                  currentTile.changePosition([row + 1, y]);
-                  currentTile.changeId(this._config.board.map[row + 1][y].id);
                   this._config.board.map[row][y].value = null;
                   isPositionChanged = true;
                   row++;
                 } else if (this._config.board.map[row + 1][y].value === this._config.board.map[row][y].value) {
-                  let nextTile: Tile = this._tiles.find((item: Tile) => {
-                    return item.id === this._config.board.map[row + 1][y].id;
-                  });
-                  let currentTile: Tile = this._tiles.find((item: Tile) => {
-                    return item.id === this._config.board.map[row][y].id;
-                  });
-                  nextTile.changeValue();
                   this._config.board.map[row + 1][y].value *= 2;
-                  nextTile.changeId(this._config.board.map[row + 1][y].id);
                   this.score += this._config.board.map[row + 1][y].value;
                   this._config.board.map[row][y].value = null;
-                  this._tiles = this._tiles.filter(item => item.id !== currentTile.id);
                   isPositionChanged = true;
                   break;
                 } else {
@@ -324,27 +271,13 @@ export class Game {
             if (this._config.board.map[x][y].value) {
               while (column > 0) {
                 if (!this._config.board.map[x][column - 1].value) {
-                  let currentTile: Tile = this._tiles.find((item: Tile) => {
-                    return item.id === this._config.board.map[x][column].id;
-                  });
                   this._config.board.map[x][column - 1].value = this._config.board.map[x][column].value;
                   this._config.board.map[x][column].value = null;
-                  currentTile.changePosition([x, column - 1]);
-                  currentTile.changeId(this._config.board.map[x][column - 1].id);
                   isPositionChanged = true;
                   column--;
                 } else if (this._config.board.map[x][column - 1].value === this._config.board.map[x][column].value) {
-                  let currentTile: Tile = this._tiles.find((item: Tile) => {
-                    return item.id === this._config.board.map[x][column].id;
-                  });
-                  let prevTile: Tile = this._tiles.find((item: Tile) => {
-                    return item.id === this._config.board.map[x][column - 1].id;
-                  });
-                  prevTile.changeValue();
                   this._config.board.map[x][column - 1].value *= 2;
-                  prevTile.changeId(this._config.board.map[x][column - 1].id);
                   this.score += this._config.board.map[x][column - 1].value;
-                  this._tiles = this._tiles.filter(item => item.id !== currentTile.id);
                   this._config.board.map[x][column].value = null;
                   isPositionChanged = true;
                   break;
@@ -366,7 +299,7 @@ export class Game {
     };
   }
 
-  protected _handleKeyboardEvents = (e: KeyboardEvent): void => {
+  private _handleKeyboardEvents = (e: KeyboardEvent): void => {
     const { up, down, left, right } = this._controller();
     if (e.key === 'ArrowUp') {
       if (!this._nativeStopper) {
@@ -394,12 +327,12 @@ export class Game {
     }
   };
 
-  protected _handleMouseDownEvent(e: MouseEvent): void {
+  private _handleMouseDownEvent(e: MouseEvent): void {
     this._oldY = e.pageY;
     this._oldX = e.pageX;
   }
 
-  protected _handleDirection(deltaX: number, deltaY: number): void {
+  private _handleDirection(deltaX: number, deltaY: number): void {
     const { up, down, left, right } = this._controller();
 
     if (Math.abs(deltaX) > Math.abs(deltaY)) {
@@ -431,24 +364,24 @@ export class Game {
     }
   }
 
-  protected _handleMouseUpEvent(e: MouseEvent): void {
+  private _handleMouseUpEvent(e: MouseEvent): void {
     let deltaX = this._oldX - e.pageX;
     let deltaY = this._oldY - e.pageY;
     this._handleDirection(deltaX, deltaY);
   }
 
-  protected _handleTouchStartEvent(e: TouchEvent): void {
+  private _handleTouchStartEvent(e: TouchEvent): void {
     this._oldX = Math.floor(e.changedTouches[0].pageX);
     this._oldY = Math.floor(e.changedTouches[0].pageY);
   }
 
-  protected _handleTouchEndEvent(e: TouchEvent): void {
+  private _handleTouchEndEvent(e: TouchEvent): void {
     let deltaX = this._oldX - Math.floor(e.changedTouches[0].pageX);
     let deltaY = this._oldY - Math.floor(e.changedTouches[0].pageY);
     this._handleDirection(deltaX, deltaY);
   }
 
-  protected _addEventListeners(): void {
+  private _addEventListeners(): void {
     window.addEventListener('keydown', (e: KeyboardEvent) => this._handleKeyboardEvents(e));
 
     window.addEventListener(
@@ -472,13 +405,10 @@ export class Game {
     );
   }
 
-  protected _downloadGameData(): void {
-    this.create()
-      .tiles(this._cache);
+  private _downloadGameData(): void {
     this._config.board.map = this._cache;
-    console.error('wtf');
-    console.log(this._tiles);
-    console.log(this._config.board.map);
+    this._draw()
+      .tiles();
   }
 
   private _startFirstRound(): void {
@@ -497,10 +427,10 @@ export class Game {
     this._draw()
       .cell();
     this._draw()
-      .tile();
+      .tiles();
   }
 
-  private update() {
+  private update(): void {
     localStorage.setItem('cache', JSON.stringify(this._config.board.map));
     this.cleanGame();
     this._draw()
@@ -508,13 +438,8 @@ export class Game {
     this._draw()
       .cell();
     this._draw()
-      .tile();
+      .tiles();
     this._nativeStopper = false;
-    console.log(this._tiles);
-    console.log(this._config.board.map);
-    console.log(this.score);
-    console.log(this.moveCounter);
-    console.log(this.gameStatus);
   }
 
   private cleanGame(): void {
