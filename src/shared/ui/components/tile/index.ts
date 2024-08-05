@@ -1,4 +1,4 @@
-import { Config, Coordinates } from '../../../../app';
+import { Config } from '../../../../app';
 import { colorsMap } from '../../../utils/constants/colors';
 import { Cell } from '../cell';
 
@@ -26,6 +26,7 @@ export type TileConstructor = {
 }
 
 export class Tile extends Cell implements ITile {
+  id: string;
   x: number;
   y: number;
   readonly ctx: CanvasRenderingContext2D;
@@ -61,8 +62,8 @@ export class Tile extends Cell implements ITile {
     this.fontSize = config.board.fontSize;
     this.fontColor = config.board.fontColor;
     this.coordinates = coordinates;
-    this.x = this.config.board.map[this.coordinates[0]][this.coordinates[1]].x;
-    this.y = this.config.board.map[this.coordinates[0]][this.coordinates[1]].y;
+    this.x = this.config.board.map[this.coordinates[1]][this.coordinates[0]].x;
+    this.y = this.config.board.map[this.coordinates[1]][this.coordinates[0]].y;
   }
 
   protected _assignColor(): void {
@@ -93,18 +94,13 @@ export class Tile extends Cell implements ITile {
   };
 
   public draw(): void {
-    this._assignColor();
-    this.ctx.fillStyle = this.color;
-    this.ctx.beginPath();
-    this.ctx.roundRect(this.x, this.y, this.size, this.size, [2]);
-    this.ctx.fill();
-    this._assignValue();
+    if(this.value !== null) {
+      this._assignColor();
+      this.ctx.fillStyle = this.color;
+      this.ctx.beginPath();
+      this.ctx.roundRect(this.x, this.y, this.size, this.size, [2]);
+      this.ctx.fill();
+      this._assignValue();
+    }
   };
-
-  public changePosition(coordinates: Coordinates): void {
-    const [XCoordinate, YCoordinate] = coordinates;
-    this.x = this.config.board.map[XCoordinate][YCoordinate].x;
-    this.y = this.config.board.map[XCoordinate][YCoordinate].y;
-    this.coordinates = coordinates;
-  }
 }

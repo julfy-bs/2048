@@ -1,8 +1,7 @@
-import { Config, Coordinates, GameConstruct, getRandomCoords } from '../../app';
+import { Config, GameConstruct, getRandomCoords, TMap } from '../../app';
 import { Board } from '../../shared/ui/components/board';
 import { Cell } from '../../shared/ui/components/cell';
 import { Tile } from '../../shared/ui/components/tile';
-import { TMap } from '../../app';
 
 export type GameConstructor = {
   ctx: CanvasRenderingContext2D;
@@ -10,21 +9,29 @@ export type GameConstructor = {
   engine: GameConstruct;
 }
 
+enum GameStatus {
+  OVER = 'over',
+  CONTINUES = 'continues',
+  NEW = 'new'
+}
+
 /**
  * @class Game
  * @description Создает объект игры.
  */
 export class Game {
-  gameStatus: 'over' | 'continues';
+  gameStatus: GameStatus.OVER | GameStatus.CONTINUES | GameStatus.NEW;
   isCreatingTilesAvailable: boolean;
   score: number;
-  engine: GameConstruct;
-  _cache: TMap[];
+  _engine: GameConstruct;
   readonly _ctx: CanvasRenderingContext2D;
   readonly _config: Config;
-  private freeCells: Coordinates[];
   private moveCounter: number;
-  private nativeStopper: boolean;
+  private _nativeStopper: boolean;
+  private _oldX: number;
+  private _oldY: number;
+  private _gameCached: boolean;
+  private readonly _cache: TMap[][] | null;
 
   constructor({
     ctx,
@@ -33,28 +40,30 @@ export class Game {
   }: GameConstructor) {
     this._ctx = ctx;
     this._config = config;
-    this.freeCells = [];
-    this.isCreatingTilesAvailable = this.freeCells.length > 0;
     this.score = 0;
     this.moveCounter = 0;
-    this.nativeStopper = false;
-    this.engine = engine;
+    this._nativeStopper = false;
+    this._engine = engine;
+    this._oldX = 0;
+    this._oldY = 0;
+    this._cache = JSON.parse(localStorage.getItem('cache')) ?? null;
   }
 
-  start() {
-    this.startFirstRound();
-    this.gameStatus = 'continues';
-    this.addControls();
-    this._cache = this._iterateMatrix(this._config.board.map);
-    console.log(this._cache, this._config.board.map);
+  public start() {
+    if (this._cache !== null) {
+      this._gameCached = true;
+    }
+    this._startFirstRound();
+    this.gameStatus = GameStatus.CONTINUES;
+    this._addEventListeners();
   }
 
-  create() {
+  private create() {
     const {
       cell: createCell,
       tile: createTile,
       board: createBoard,
-    } = this.engine;
+    } = this._engine;
 
     return {
       board: (): Board => {
@@ -71,7 +80,7 @@ export class Game {
               ctx: this._ctx,
               size: this._config.cell.size,
               config: this._config,
-              coordinates: [x, y],
+              coordinates: this._config.board.map[x][y].coordinates,
             });
             cells.push(newCell);
           }
@@ -79,11 +88,12 @@ export class Game {
 
         return cells;
       },
+      // TODO: Тип
       tile: (): Tile => {
         let newTile: Tile;
         let isTileCreated = false;
 
-        while (!isTileCreated && this.freeCells.length > 0) {
+        while (!isTileCreated && this.isCreatingTilesAvailable) {
           newTile = createTile({
             ctx: this._ctx,
             coordinates: [
@@ -93,37 +103,40 @@ export class Game {
             value: getRandomCoords(0, 100) > 90 ? 4 : 2,
             config: this._config,
           });
-          const isCellAvailable: boolean = this.freeCells.some((coordinates: Coordinates) => coordinates.toString() === newTile.coordinates.toString());
+          const isCellAvailable: boolean = this._config.board.map[newTile.coordinates[0]][newTile.coordinates[1]].value === null;
           if (isCellAvailable
             && !this._config.board.map[newTile.coordinates[0]][newTile.coordinates[1]]?.value
           ) {
-            this._config.board.map[newTile.coordinates[0]][newTile.coordinates[1]].value = newTile;
+            this._config.board.map[newTile.coordinates[0]][newTile.coordinates[1]].value = newTile.value;
             isTileCreated = true;
-          } else if (!isCellAvailable && this.freeCells.length === 0) {
-            this.gameStatus = 'over';
+          } else if (!isCellAvailable && !this.isCreatingTilesAvailable) {
+            this.gameStatus = GameStatus.OVER;
+            console.log(this.gameStatus);
           }
         }
 
-        this.findFreeCells();
+        this._findFreeCells();
         return newTile;
       },
     };
   }
 
-  findFreeCells() {
-    this.freeCells = [];
+  private _findFreeCells(): void {
+    const freeCells = [];
+
     for (let x = 0; x < this._config.board.map.length; x++) {
       for (let y = 0; y < this._config.board.map.length; y++) {
         if (this._config.board.map[x][y].value === null) {
-          this.freeCells.push([x, y]);
+          freeCells.push([x, y]);
         }
       }
     }
-    this.isCreatingTilesAvailable = this.freeCells.length > 0;
+    this.isCreatingTilesAvailable = freeCells.length > 0;
   }
 
-  protected draw() {
+  private _draw() {
     const { board: createBoard, cell: createCell } = this.create();
+    const { tile: createTile } = this._engine;
     return {
       board: (): void => {
         createBoard()
@@ -133,11 +146,17 @@ export class Game {
         const cells = createCell();
         cells.forEach((cell: Cell) => cell.draw());
       },
-      tile: (): void => {
-        for (let x = 0; x < this._config.board.map.length; x++) {
-          for (let y = 0; y < this._config.board.map.length; y++) {
-            if (this._config.board.map[x][y]?.value !== null) {
-              this._config.board.map[x][y]?.value.draw();
+      tiles: () => {
+        for (let y = 0; y < this._config.board.map.length; y++) {
+          for (let x = 0; x < this._config.board.map.length; x++) {
+            if (this._config.board.map[y][x].value !== null) {
+              const newTile = createTile({
+                ctx: this._ctx,
+                config: this._config,
+                coordinates: this._config.board.map[y][x].coordinates,
+                value: this._config.board.map[y][x].value,
+              });
+              newTile.draw();
             }
           }
         }
@@ -145,54 +164,26 @@ export class Game {
     };
   }
 
-  protected addControls() {
-    const { up, down, left, right } = this.controller();
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowUp') {
-        if (!this.nativeStopper) {
-          up();
-        }
-        this.update();
-      }
-      if (e.key === 'ArrowRight') {
-        if (!this.nativeStopper) {
-          right();
-        }
-        this.update();
-      }
-      if (e.key === 'ArrowDown') {
-        if (!this.nativeStopper) {
-          down();
-        }
-        this.update();
-      }
-      if (e.key === 'ArrowLeft') {
-        if (!this.nativeStopper) {
-          left();
-        }
-        this.update();
-      }
-    });
-  }
-
-  protected controller() {
+  private _controller() {
+    let isPositionChanged = false;
     return {
       up: () => {
         for (let y = 0; y < this._config.game.size; y++) {
           for (let x = 1; x < this._config.game.size; x++) {
-
             if (this._config.board.map[x][y]?.value) {
               let row = x;
               while (row > 0) {
                 if (!this._config.board.map[row - 1][y].value) {
-                  this._config.board.map[row - 1][y].value = this._config.board.map[row][y]?.value;
-                  this._config.board.map[row][y].value.changePosition([row - 1, y]);
+
+                  this._config.board.map[row - 1][y].value = this._config.board.map[row][y].value;
                   this._config.board.map[row][y].value = null;
+                  isPositionChanged = true;
                   row--;
-                } else if (this._config.board.map[row - 1][y].value.value === this._config.board.map[row][y]?.value?.value) {
-                  this._config.board.map[row - 1][y].value.value *= 2;
-                  this.score += this._config.board.map[row - 1][y]?.value?.value;
+                } else if (this._config.board.map[row - 1][y].value === this._config.board.map[row][y].value) {
+                  this._config.board.map[row - 1][y].value *= 2;
+                  this.score += this._config.board.map[row - 1][y].value;
                   this._config.board.map[row][y].value = null;
+                  isPositionChanged = true;
                   break;
                 } else {
                   break;
@@ -202,8 +193,12 @@ export class Game {
           }
         }
 
-        this.moveCounter++;
-        this.nativeStopper = true;
+        if (isPositionChanged) {
+          this.moveCounter++;
+          this._nativeStopper = true;
+          this.create()
+            .tile();
+        }
       },
       right: () => {
         for (let x = 0; x < this._config.game.size; x++) {
@@ -212,16 +207,15 @@ export class Game {
             if (this._config.board.map[x][y]?.value) {
               while (column + 1 < this._config.game.size) {
                 if (!this._config.board.map[x][column + 1]?.value) {
-                  this._config.board.map[x][column + 1].value = this._config.board.map[x][column]?.value;
-                  this._config.board.map[x][column]?.value.changePosition([x, column + 1]);
+                  this._config.board.map[x][column + 1].value = this._config.board.map[x][column].value;
                   this._config.board.map[x][column].value = null;
+                  isPositionChanged = true;
                   column++;
-                } else if (this._config.board.map[x][column + 1].value.value === this._config.board.map[x][column].value.value) {
-                  this._config.board.map[x][column + 1].value.value = this._config.board.map[x][column + 1].value.value * 2;
-                  this.score += this._config.board.map[x][column + 1].value.value;
+                } else if (this._config.board.map[x][column + 1].value === this._config.board.map[x][column].value) {
+                  this._config.board.map[x][column + 1].value *= 2;
+                  this.score += this._config.board.map[x][column + 1].value;
                   this._config.board.map[x][column].value = null;
-                  this.create()
-                    .tile();
+                  isPositionChanged = true;
                   break;
                 } else {
                   break;
@@ -231,26 +225,29 @@ export class Game {
           }
         }
 
-        this.moveCounter++;
-        this.nativeStopper = true;
+        if (isPositionChanged) {
+          this.moveCounter++;
+          this._nativeStopper = true;
+          this.create()
+            .tile();
+        }
       },
       down: () => {
         for (let y = 0; y < this._config.game.size; y++) {
           for (let x = this._config.game.size - 2; x >= 0; x--) {
             let row = x;
-            if (this._config.board.map[x][y]?.value) {
+            if (this._config.board.map[x][y].value) {
               while (row + 1 < this._config.game.size) {
-                if (!this._config.board.map[row + 1][y]?.value) {
-                  this._config.board.map[row][y]?.value.changePosition([row + 1, y]);
+                if (!this._config.board.map[row + 1][y].value) {
                   this._config.board.map[row + 1][y].value = this._config.board.map[row][y].value;
                   this._config.board.map[row][y].value = null;
+                  isPositionChanged = true;
                   row++;
-                } else if (this._config.board.map[row + 1][y].value.value === this._config.board.map[row][y].value.value) {
-                  this._config.board.map[row + 1][y].value.value *= 2;
-                  this.score += this._config.board.map[row + 1][y].value.value;
+                } else if (this._config.board.map[row + 1][y].value === this._config.board.map[row][y].value) {
+                  this._config.board.map[row + 1][y].value *= 2;
+                  this.score += this._config.board.map[row + 1][y].value;
                   this._config.board.map[row][y].value = null;
-                  this.create()
-                    .tile();
+                  isPositionChanged = true;
                   break;
                 } else {
                   break;
@@ -260,8 +257,12 @@ export class Game {
           }
         }
 
-        this.moveCounter++;
-        this.nativeStopper = true;
+        if (isPositionChanged) {
+          this.moveCounter++;
+          this._nativeStopper = true;
+          this.create()
+            .tile();
+        }
       },
       left: () => {
         for (let x = 0; x < this._config.game.size; x++) {
@@ -271,15 +272,14 @@ export class Game {
               while (column > 0) {
                 if (!this._config.board.map[x][column - 1].value) {
                   this._config.board.map[x][column - 1].value = this._config.board.map[x][column].value;
-                  this._config.board.map[x][column].value.changePosition([x, column - 1]);
                   this._config.board.map[x][column].value = null;
+                  isPositionChanged = true;
                   column--;
-                } else if (this._config.board.map[x][column - 1].value.value === this._config.board.map[x][column].value.value) {
-                  this._config.board.map[x][column - 1].value.value = this._config.board.map[x][column - 1].value.value * 2;
-                  this.score += this._config.board.map[x][column - 1].value.value;
+                } else if (this._config.board.map[x][column - 1].value === this._config.board.map[x][column].value) {
+                  this._config.board.map[x][column - 1].value *= 2;
+                  this.score += this._config.board.map[x][column - 1].value;
                   this._config.board.map[x][column].value = null;
-                  this.create()
-                    .tile();
+                  isPositionChanged = true;
                   break;
                 } else {
                   break;
@@ -289,70 +289,160 @@ export class Game {
           }
         }
 
-        this.moveCounter++;
-        this.nativeStopper = true;
+        if (isPositionChanged) {
+          this.moveCounter++;
+          this._nativeStopper = true;
+          this.create()
+            .tile();
+        }
       },
     };
   }
 
-  protected _iterateMatrix(matrix: TMap[][]): TMap[] {
-    const array: TMap[] = [];
-
-    let cloneMatrix = [];
-
-    for (let m = 0; m < matrix.length; m++) {
-      cloneMatrix.push([...matrix[m]]);
+  private _handleKeyboardEvents = (e: KeyboardEvent): void => {
+    const { up, down, left, right } = this._controller();
+    if (e.key === 'ArrowUp') {
+      if (!this._nativeStopper) {
+        up();
+      }
+      this.update();
     }
-
-    while (cloneMatrix.length) {
-      array.push(
-        ...cloneMatrix.shift(),
-        ...cloneMatrix.map(a => a.pop()),
-        ...(cloneMatrix.pop() || []).reverse(),
-        ...cloneMatrix.map(a => a.shift())
-          .reverse(),
-      );
+    if (e.key === 'ArrowRight') {
+      if (!this._nativeStopper) {
+        right();
+      }
+      this.update();
     }
-    return array;
+    if (e.key === 'ArrowDown') {
+      if (!this._nativeStopper) {
+        down();
+      }
+      this.update();
+    }
+    if (e.key === 'ArrowLeft') {
+      if (!this._nativeStopper) {
+        left();
+      }
+      this.update();
+    }
+  };
+
+  private _handleMouseDownEvent(e: MouseEvent): void {
+    this._oldY = e.pageY;
+    this._oldX = e.pageX;
   }
 
-  private startFirstRound() {
-    this.findFreeCells();
-    this.create()
-      .tile();
-    this.create()
-      .tile();
-    this.draw()
-      .board();
-    this.draw()
-      .cell();
-    this.draw()
-      .tile();
+  private _handleDirection(deltaX: number, deltaY: number): void {
+    const { up, down, left, right } = this._controller();
+
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX > 0) {
+        if (!this._nativeStopper) {
+          left();
+        }
+        this.update();
+      } else if (deltaX < 0) {
+        if (!this._nativeStopper) {
+          right();
+        }
+        this.update();
+      }
+    } else if (Math.abs(deltaX) < Math.abs(deltaY)) {
+      if (deltaY > 0) {
+        if (!this._nativeStopper) {
+          up();
+        }
+        this.update();
+      } else if (deltaY < 0) {
+        if (!this._nativeStopper) {
+          down();
+        }
+        this.update();
+      }
+    } else {
+      return;
+    }
   }
 
-  private update() {
-    // TODO: добавить проверку на совершенное действие, чтобы пофиксить баг с появлением тайла.
-    const hasChanges = false;
-    console.log(hasChanges);
-    // if (hasChanges) {
+  private _handleMouseUpEvent(e: MouseEvent): void {
+    let deltaX = this._oldX - e.pageX;
+    let deltaY = this._oldY - e.pageY;
+    this._handleDirection(deltaX, deltaY);
+  }
+
+  private _handleTouchStartEvent(e: TouchEvent): void {
+    this._oldX = Math.floor(e.changedTouches[0].pageX);
+    this._oldY = Math.floor(e.changedTouches[0].pageY);
+  }
+
+  private _handleTouchEndEvent(e: TouchEvent): void {
+    let deltaX = this._oldX - Math.floor(e.changedTouches[0].pageX);
+    let deltaY = this._oldY - Math.floor(e.changedTouches[0].pageY);
+    this._handleDirection(deltaX, deltaY);
+  }
+
+  private _addEventListeners(): void {
+    window.addEventListener('keydown', (e: KeyboardEvent) => this._handleKeyboardEvents(e));
+
+    window.addEventListener(
+      'mousedown',
+      (e: MouseEvent) => this._handleMouseDownEvent(e),
+    );
+
+    window.addEventListener(
+      'mouseup',
+      (e: MouseEvent) => this._handleMouseUpEvent(e),
+    );
+
+    window.addEventListener(
+      'touchstart',
+      (e: TouchEvent) => this._handleTouchStartEvent(e),
+    );
+
+    window.addEventListener(
+      'touchend',
+      (e: TouchEvent) => this._handleTouchEndEvent(e),
+    );
+  }
+
+  private _downloadGameData(): void {
+    this._config.board.map = this._cache;
+    this._draw()
+      .tiles();
+  }
+
+  private _startFirstRound(): void {
+    this._findFreeCells();
+
+    if (this._gameCached) {
+      this._downloadGameData();
+    } else {
       this.create()
         .tile();
-    // }
-    this._cache = this._iterateMatrix(this._config.board.map);
-    this.cleanGame();
-    this.draw()
+      this.create()
+        .tile();
+    }
+    this._draw()
       .board();
-    this.draw()
+    this._draw()
       .cell();
-    this.draw()
-      .tile();
-    this.nativeStopper = false;
-    console.log(this.score);
-    console.log(this.moveCounter);
-    console.log(this.gameStatus);
+    this._draw()
+      .tiles();
   }
 
-  private cleanGame() {
+  private update(): void {
+    localStorage.setItem('cache', JSON.stringify(this._config.board.map));
+    this.cleanGame();
+    this._draw()
+      .board();
+    this._draw()
+      .cell();
+    this._draw()
+      .tiles();
+    this._nativeStopper = false;
+  }
+
+  private cleanGame(): void {
     this._ctx.clearRect(0, 0, this._config.board.size, this._config.board.size);
   }
 }
