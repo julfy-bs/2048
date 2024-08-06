@@ -1,32 +1,9 @@
-import { Config } from '../../../../app';
-import { colorsMap } from '../../../utils/constants/colors';
+import { Config } from '../../../types/config';
+import { colors as gameColors } from '../../../utils/constants/colors';
 import { Cell } from '../cell';
-
-interface ITile {
-  x: number;
-  y: number;
-  readonly ctx: CanvasRenderingContext2D;
-  value: number;
-  color: string;
-  readonly strokeColor: string;
-  readonly size: number;
-  fontSize: number;
-  font: string;
-  shadow: string;
-  fontColor: string | CanvasGradient | CanvasPattern;
-  coordinates: number[];
-  config: Config;
-}
-
-export type TileConstructor = {
-  ctx: CanvasRenderingContext2D;
-  coordinates: number[];
-  value: number;
-  config: Config;
-}
+import { ITile, TileConstructor } from './types';
 
 export class Tile extends Cell implements ITile {
-  id: string;
   x: number;
   y: number;
   readonly ctx: CanvasRenderingContext2D;
@@ -67,7 +44,7 @@ export class Tile extends Cell implements ITile {
   }
 
   protected _assignColor(): void {
-    const colors = Object.entries(colorsMap);
+    const colors = Object.entries(gameColors);
     let i = 0;
     while (i < colors.length) {
       if (+colors[i][0] === this.value) {

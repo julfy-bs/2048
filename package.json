@@ -2,7 +2,7 @@
   "name": "2048",
   "version": "1.0.0",
   "description": "\"2048\" - пет проект для практики JS, вдохновленный популярной игрой 2048, написанной итальянским разработчиком Габриэле Чирулли.",
-  "main": "src/app/index.ts",
+  "main": "src/index.ts",
   "scripts": {
     "develop": "webpack-dev-server --mode development",
     "build": "webpack --mode production"

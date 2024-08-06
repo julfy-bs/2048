@@ -1,3 +1,0 @@
-.tile_position_3_4 {
-  transform: translate(calc(var(--board-transform-step) * 2), calc(var(--board-transform-step) * 3));
-}
