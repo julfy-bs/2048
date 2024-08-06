@@ -88,7 +88,6 @@ export class GameBase {
             this._config.board.map[newTile.coordinates[0]][newTile.coordinates[1]].value = newTile.value;
             isTileCreated = true;
             const isGameWon = checkWin(this._config.board.map);
-            console.log(isGameWon);
             if (isGameWon) {
               this._gameStatus = GameStatus.WIN;
             }
@@ -136,7 +135,6 @@ export class GameBase {
     this._cleanGame();
     this._checkScore();
     const isGameWon: boolean = checkWin(this._config.board.map);
-    console.log(isGameWon)
     if (isGameWon) {
       this._gameStatus = GameStatus.WIN;
     }
