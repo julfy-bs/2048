@@ -9,6 +9,7 @@ export class Board {
   private readonly ctx: CanvasRenderingContext2D;
   private readonly color: string;
   private readonly size: number;
+  private config: Config;
 
   constructor({
     ctx,
@@ -17,12 +18,13 @@ export class Board {
     this.ctx = ctx;
     this.color = config.board.color;
     this.size = config.board.size;
+    this.config = config;
   }
 
   draw() {
     this.ctx.fillStyle = this.color;
     this.ctx.beginPath();
-    this.ctx.roundRect(0, 0, this.size, this.size, [10]);
+    this.ctx.roundRect(0, this.config.canvas.headerHeight, this.size, this.size, [10]);
     this.ctx.fill();
   }
 }

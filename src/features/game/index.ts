@@ -1,6 +1,7 @@
 import { Config, GameConstruct, getRandomCoords, TMap } from '../../app';
 import { Board } from '../../shared/ui/components/board';
 import { Cell } from '../../shared/ui/components/cell';
+import { Score } from '../../shared/ui/components/score';
 import { Tile } from '../../shared/ui/components/tile';
 
 export type GameConstructor = {
@@ -32,6 +33,7 @@ export class Game {
   private _oldY: number;
   private _gameCached: boolean;
   private readonly _cache: TMap[][] | null;
+  private bestScore: number;
 
   constructor({
     ctx,
@@ -40,17 +42,19 @@ export class Game {
   }: GameConstructor) {
     this._ctx = ctx;
     this._config = config;
-    this.score = 0;
+    this.score = JSON.parse(localStorage.getItem('score')) ?? 0;
+    this.bestScore = JSON.parse(localStorage.getItem('bestScore')) ?? 0;
     this.moveCounter = 0;
     this._nativeStopper = false;
     this._engine = engine;
     this._oldX = 0;
     this._oldY = 0;
     this._cache = JSON.parse(localStorage.getItem('cache')) ?? null;
+    // this._cache = null;
   }
 
   public start() {
-    if (this._cache !== null) {
+    if (this._cache !== null && this.score !== 0) {
       this._gameCached = true;
     }
     this._startFirstRound();
@@ -63,6 +67,7 @@ export class Game {
       cell: createCell,
       tile: createTile,
       board: createBoard,
+      score: createScore,
     } = this._engine;
 
     return {
@@ -118,6 +123,24 @@ export class Game {
         this._findFreeCells();
         return newTile;
       },
+      score: (): Score => {
+        return createScore({
+          ctx: this._ctx,
+          config: this._config,
+          position: this._config.score.score.position,
+          value: this.score,
+          title: 'Score'
+        });
+      },
+      bestScore: (): Score => {
+        return createScore({
+          ctx: this._ctx,
+          config: this._config,
+          position: this._config.score.bestScore.position,
+          value: this.bestScore,
+          title: 'Best score'
+        });
+      },
     };
   }
 
@@ -135,7 +158,12 @@ export class Game {
   }
 
   private _draw() {
-    const { board: createBoard, cell: createCell } = this.create();
+    const {
+      board: createBoard,
+      cell: createCell,
+      score: createScore,
+      bestScore: createBestScore,
+    } = this.create();
     const { tile: createTile } = this._engine;
     return {
       board: (): void => {
@@ -161,7 +189,22 @@ export class Game {
           }
         }
       },
+      score: (): void => {
+        createScore()
+          .draw();
+      },
+      bestScore: (): void => {
+        createBestScore()
+          .draw();
+      },
     };
+  }
+
+  private _checkScore() {
+    console.log(this.score, this.bestScore);
+    if (this.score > this.bestScore) {
+      this.bestScore = this.score;
+    }
   }
 
   private _controller() {
@@ -406,7 +449,12 @@ export class Game {
   }
 
   private _downloadGameData(): void {
-    this._config.board.map = this._cache;
+    this._checkScore();
+    for (let x = 0; x < this._config.board.map.length; x++) {
+      for (let y = 0; y < this._config.board.map.length; y++) {
+        this._config.board.map[x][y].value = this._cache[x][y].value;
+      }
+    }
     this._draw()
       .tiles();
   }
@@ -417,11 +465,16 @@ export class Game {
     if (this._gameCached) {
       this._downloadGameData();
     } else {
+      this.score = 0;
       this.create()
         .tile();
       this.create()
         .tile();
     }
+    this._draw()
+      .score();
+    this._draw()
+      .bestScore();
     this._draw()
       .board();
     this._draw()
@@ -432,7 +485,14 @@ export class Game {
 
   private update(): void {
     localStorage.setItem('cache', JSON.stringify(this._config.board.map));
+    localStorage.setItem('score', JSON.stringify(this.score));
+    localStorage.setItem('bestScore', JSON.stringify(this.bestScore));
     this.cleanGame();
+    this._checkScore();
+    this._draw()
+      .score();
+    this._draw()
+      .bestScore();
     this._draw()
       .board();
     this._draw()
