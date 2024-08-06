@@ -1,0 +1,41 @@
+{
+  "name": "2048",
+  "version": "1.0.0",
+  "description": "\"2048\" - пет проект для практики JS, вдохновленный популярной игрой 2048, написанной итальянским разработчиком Габриэле Чирулли.",
+  "main": "src/index.ts",
+  "scripts": {
+    "develop": "webpack-dev-server --mode development",
+    "build": "webpack --mode production",
+    "deploy": "gh-pages -d dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/julfy-bs/2048.git"
+  },
+  "keywords": [
+    "game",
+    "js"
+  ],
+  "author": {
+    "name": "Bogdan Sutuzhko",
+    "email": "julfy.web@gmail.com"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/julfy-bs/2048/issues"
+  },
+  "homepage": "https://github.com/julfy-bs/2048#readme",
+  "devDependencies": {
+    "@types/uuid": "^10.0.0",
+    "css-loader": "^7.1.2",
+    "gh-pages": "^6.1.1",
+    "html-webpack-plugin": "^5.6.0",
+    "mini-css-extract-plugin": "^2.9.0",
+    "nanoid": "^5.0.7",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.5.4",
+    "webpack": "^5.93.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.0.4"
+  }
+}
