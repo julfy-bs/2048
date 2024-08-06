@@ -1,4 +1,4 @@
-export const colorsMap = {
+export const colors = {
   '2': '#eee4da',
   '4': '#ece0c7',
   '8': '#f2b176',

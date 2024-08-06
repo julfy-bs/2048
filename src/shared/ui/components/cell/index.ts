@@ -1,11 +1,5 @@
-import { Config } from '../../../../app';
-
-export type CellConstructor = {
-  ctx: CanvasRenderingContext2D;
-  config: Config;
-  size: number;
-  coordinates: number[];
-}
+import { Config } from '../../../types/config';
+import { CellConstructor } from './types';
 
 export class Cell {
   readonly ctx: CanvasRenderingContext2D;
