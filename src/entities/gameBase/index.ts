@@ -78,11 +78,9 @@ export class GameBase {
               getRandomNumber(0, this._config.game.size),
               getRandomNumber(0, this._config.game.size),
             ],
-            value: 2048,
-            // value: getRandomNumber(0, 100) > 90 ? 4 : 2,
+            value: getRandomNumber(0, 100) > 90 ? 4 : 2,
             config: this._config,
           });
-          this._score = 21112;
           const isCellAvailable: boolean = this._config.board.map[newTile.coordinates[0]][newTile.coordinates[1]].value === null;
           if (isCellAvailable
             && !this._config.board.map[newTile.coordinates[0]][newTile.coordinates[1]]?.value
@@ -90,6 +88,7 @@ export class GameBase {
             this._config.board.map[newTile.coordinates[0]][newTile.coordinates[1]].value = newTile.value;
             isTileCreated = true;
             const isGameWon = checkWin(this._config.board.map);
+            console.log(isGameWon);
             if (isGameWon) {
               this._gameStatus = GameStatus.WIN;
             }
@@ -137,6 +136,7 @@ export class GameBase {
     this._cleanGame();
     this._checkScore();
     const isGameWon: boolean = checkWin(this._config.board.map);
+    console.log(isGameWon)
     if (isGameWon) {
       this._gameStatus = GameStatus.WIN;
     }
@@ -189,8 +189,8 @@ export class GameBase {
       this._score = 0;
       this._create()
         .tile();
-      // this._create()
-      //   .tile();
+      this._create()
+        .tile();
     }
     this._draw()
       .all();
@@ -204,7 +204,6 @@ export class GameBase {
   }
 
   private _checkLose(): void {
-    this._gameStatus = GameStatus.CONTINUES;
     const isGameLoss: boolean =
       checkLose({
         matrix: this._config.board.map,
