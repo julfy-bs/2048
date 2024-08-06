@@ -31,7 +31,6 @@ export const checkLose = (constructor: Constructor): boolean => {
       }
 
       if (isCreatingTilesAvailable) {
-        console.log(isCreatingTilesAvailable);
         return false;
       }
     }
