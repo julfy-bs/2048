@@ -2,7 +2,8 @@
 
 "2048" - пет проект для практики JS, вдохновленный популярной игрой [2048][2048-game], написанной итальянским разработчиком [Габриэле Чирулли][2048-author]. 
 
-![img.png](README/game_start.png)
+<img width="1440" alt="image" src="https://github.com/user-attachments/assets/aa8083a8-a45c-4f68-8fb2-959d0acd7eeb">
+
 
 ## Правила игры в 2048
 
